@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [[ -z "${CONTAINER_ROOT}" ]]; then
+    export CONTAINER_ROOT='/var/srv/containers'
+fi
+source "${CONTAINER_ROOT}/.bin/rc.bash"
+
+if [[ $# -ne 1 ]]; then
+    printf "Usage: %s CONTAINER_NAME\n" "${0}"
+    exit 1
+fi
+
+CONTAINER_NAME="${1}"
+shift
+
+source "$(container_home ${CONTAINER_NAME})/vars.bash"
+CONTAINER_DATA_HOME="$(container_data_home ${CONTAINER_NAME})"
+
+for v in ${CONTAINER_VOLUMES[@]}; do
+    this_dir="$(printf ${v} | cut -d':' -f1 -- -)"
+    # printf '[INFO] (container %s) creating: %s\n' "${CONTAINER_NAME}" "${this_dir}"
+    mkdir -vp "${CONTAINER_DATA_HOME}/${this_dir}"
+done
+
+"${CM_CMD}" create $(container_cmcmd_opt_str ${CONTAINER_NAME})

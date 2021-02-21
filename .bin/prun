@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Not really sure what this is for
+# TODO: make it only pull the volume and ports
+# TODO: make it take other args
+
+if [[ -z "${CONTAINER_ROOT}" ]]; then
+    export CONTAINER_ROOT='/var/srv/containers'
+fi
+source "${CONTAINER_ROOT}/.bin/rc.bash"
+
+if [[ $# -ne 1 ]]; then
+    printf "Usage: %s CONTAINER_NAME\n" "${0}"
+    exit 1
+fi
+
+CONTAINER_NAME="${1}"
+shift
+
+printf '%s\n' "${CM_CMD} run --rm -d $(container_cmcmd_opt_str ${CONTAINER_NAME})"
+"${CM_CMD}" run --rm -d $(container_cmcmd_opt_str ${CONTAINER_NAME})
+

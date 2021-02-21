@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ -z "${CONTAINER_ROOT}" ]]; then
+    export CONTAINER_ROOT='/var/srv/containers'
+fi
+source "${CONTAINER_ROOT}/.bin/rc.bash"
+
+if [[ $# -lt 1 ]] ; then
+    printf 'Usage: %s <CONTAINER_NAME> [command]\n' "${0}"
+    exit 1
+fi
+
+CONTAINER_NAME="${1}"
+shift
+
+if [[ $# -lt 1 ]] ; then
+    podman exec -it -- ${CONTAINER_NAME} /bin/bash
+else
+    podman exec -it -- ${CONTAINER_NAME} $*
+fi

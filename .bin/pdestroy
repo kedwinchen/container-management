@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [[ -z "${CONTAINER_ROOT}" ]]; then
+    export CONTAINER_ROOT='/var/srv/containers'
+fi
+source "${CONTAINER_ROOT}/.bin/rc.bash"
+
+E_ARGS=1
+
+if [[ $# -lt 1 ]]; then
+    printf "Usage: %s CONTAINER_NAME [options]\n" "${0}"
+    exit $E_ARGS
+fi
+
+CONTAINER_NAME="${1}"
+shift
+
+"${CM_CMD}" stop "${CONTAINER_NAME}"
+"${CM_CMD}" rm --force "${CONTAINER_NAME}"
+
+while [[ $# -gt 0 ]]; do
+    OPTION="${1}"
+    shift
+
+    case "${OPTION}" in
+        "--all-data")
+            ${CM_CMD} unshare -- rm -rvf "$(container_data_home ${CONTAINER_NAME})"
+            mkdir -p "$(container_data_home ${CONTAINER_NAME})"
+            ;;
+        *)
+            printf '[WARNING] Unknown option, ignoring: %s\n' "${OPTION}"
+            ;;
+    esac
+done

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [[ -z "${CONTAINER_ROOT}" ]]; then
+    export CONTAINER_ROOT='/var/srv/containers'
+fi
+source "${CONTAINER_ROOT}/.bin/rc.bash"
+
+E_ARGS=1
+E_CONTAINER_HOMEDIR_IS_FILE=2
+E_CONTAINER_HOMEDIR_EXISTS=3
+
+if [[ $# -lt 1 ]]; then
+    printf 'Usage: %s CONAINER_NAME [container_image]\n' "${0}"
+    exit $E_ARGS
+fi
+
+CONTAINER_NAME="${1}"
+shift
+CONTAINER_HOME="$(container_home ${CONTAINER_NAME})"
+
+if [[ -f "${CONTAINER_HOME}" ]]; then
+    printf '[FATAL] "%s" already exists and is a file\n' "${CONTAINER_HOME}" "${CONTAINER_NAME}"
+    exit $E_CONTAINER_HOMEDIR_IS_FILE
+elif [[ -d "${CONTAINER_HOME}" ]]; then
+    printf '[FATAL] "%s" already exists for container "%s"\n' "${CONTAINER_HOME}" "${CONTAINER_NAME}"
+    exit $E_CONTAINER_HOMEDIR_EXISTS
+fi
+
+cp -a "${CONTAINER_ROOT}/.skel" "${CONTAINER_HOME}"
+mkdir -p "$(container_data_home ${CONTAINER_NAME})"
+
+sed -i "s/REPLACE_CONTAINER_NAME/${CONTAINER_NAME}/g" "${CONTAINER_HOME}/vars.bash"
+
+if [[ ! -z "${1}" ]] ; then
+    CONTAINER_IMG="${1}"
+    shift
+
+    sed -i "s#REPLACE_CONTAINER_IMAGE#${CONTAINER_IMG}#g" "${CONTAINER_HOME}/vars.bash"
+fi

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [[ -z "${CONTAINER_ROOT}" ]]; then
+    export CONTAINER_ROOT='/var/srv/containers'
+fi
+source "${CONTAINER_ROOT}/.bin/rc.bash"
+
+if [[ $# -ne 1 ]]; then
+    printf "Usage: %s CONTAINER_NAME\n" "${0}"
+    exit 1
+fi
+
+CONTAINER_NAME="${1}"
+shift
+
+"${CM_CMD}" start "${CONTAINER_NAME}"
+
+# Exit code 125 means there was no container with that name
+if [[ $? -eq 125 ]] ; then
+    pcreate "${CONTAINER_NAME}"
+    "${CM_CMD}" start "${CONTAINER_NAME}"
+fi
