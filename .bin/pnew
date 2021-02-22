@@ -26,7 +26,7 @@ elif [[ -d "${CONTAINER_HOME}" ]]; then
     exit $E_CONTAINER_HOMEDIR_EXISTS
 fi
 
-cp -a "${CONTAINER_ROOT}/.skel" "${CONTAINER_HOME}"
+cp -Lnvr "${CONTAINER_ROOT}/.skel" "${CONTAINER_HOME}"
 mkdir -p "$(container_data_home ${CONTAINER_NAME})"
 
 sed -i "s/REPLACE_CONTAINER_NAME/${CONTAINER_NAME}/g" "${CONTAINER_HOME}/vars.bash"
