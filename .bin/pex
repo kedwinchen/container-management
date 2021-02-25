@@ -14,7 +14,7 @@ CONTAINER_NAME="${1}"
 shift
 
 if [[ $# -lt 1 ]] ; then
-    podman exec -it -- ${CONTAINER_NAME} /bin/bash
+    "${CM_CMD}" exec -it -- ${CONTAINER_NAME} /bin/bash
 else
-    podman exec -it -- ${CONTAINER_NAME} $*
+    "${CM_CMD}" exec -it -- ${CONTAINER_NAME} $*
 fi
