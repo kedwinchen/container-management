@@ -1,16 +1,30 @@
 #!/bin/bash
 
+## Solve for the current directory to use as root
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
 if [[ -z "${CONTAINER_ROOT}" ]]; then
-    export CONTAINER_ROOT='/var/srv/containers'
+    # export CONTAINER_ROOT='/var/srv/containers'
+    export CONTAINER_ROOT="${DIR}"
 fi
 PATH="${CONTAINER_ROOT}/.bin:${PATH}"
 
-export CM_CMD='podman'
-
-if [[ "${CM_CMD}" == "podman" ]] ; then
+if command -v podman &>/dev/null ; then
+    CM_CMD='podman'
     alias docker='podman'
-elif [[ "${CM_CMD}" == "docker" ]] ; then
+elif command -v docker &>/dev/null ; then
+    CM_CMD='docker'
     alias podman='docker'
+else
+    CM_CMD='UNKNOWN'
+    alias podman='echo "COMMAND NOT FOUND"'
+    alias docker='podman'
 fi
 
 function container_home {
