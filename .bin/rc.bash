@@ -1,30 +1,31 @@
 #!/bin/bash
 
-## Solve for the current directory to use as root
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
 if [[ -z "${CONTAINER_ROOT}" ]]; then
-    # export CONTAINER_ROOT='/var/srv/containers'
-    export CONTAINER_ROOT="${DIR}"
+    export CONTAINER_ROOT='/var/srv/containers'
 fi
 PATH="${CONTAINER_ROOT}/.bin:${PATH}"
 
 if command -v podman &>/dev/null ; then
-    CM_CMD='podman'
-    alias docker='podman'
+    export CM_CMD='podman'
+    if command -v docker &> /dev/null ; then
+        printf '%s: Found `docker`, but using `podman` as CM_CMD (not creating alias)' "${0}"
+    else
+        alias docker='podman'
+    fi
 elif command -v docker &>/dev/null ; then
-    CM_CMD='docker'
-    alias podman='docker'
+    export CM_CMD='docker'
+    if command -v podman &> /dev/null ; then
+        printf '%s: Found `podman`, but using `docker` as CM_CMD' "${0}"
+        printf '%s: Aborting... (should not be able to get here)' "${0}"
+        exit 1
+    else
+        alias podman='docker'
+    fi
 else
-    CM_CMD='UNKNOWN'
-    alias podman='echo "COMMAND NOT FOUND"'
+    export CM_CMD='UNKNOWN'
+    alias podman='echo "SUITABLE COMMAND FOR CM_CMD NOT FOUND"'
     alias docker='podman'
+    exit 1
 fi
 
 function container_home {
@@ -108,7 +109,7 @@ function container_cmcmd_opt_str {
     local env_str="$(container_env_str ${container_name})"
 
     # opt_str="--name ${container_name} --restart=always ${port_str} ${vol_str} ${env_str} ${CM_CMD_CUSTOM_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
-    opt_str="--name ${container_name} --restart=unless-stopped ${port_str} ${vol_str} ${env_str} ${CM_CMD_CUSTOM_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
+    opt_str="--name ${container_name} --restart=unless-stopped ${port_str} ${vol_str} ${env_str} ${CM_CMD_EXTRA_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
     printf '%s' "${opt_str}"
 }
 
