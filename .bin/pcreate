@@ -22,4 +22,6 @@ for v in ${CONTAINER_VOLUMES[@]}; do
     mkdir -vp "${CONTAINER_DATA_HOME}/${this_dir}"
 done
 
+set -x
 "${CM_CMD}" create $(container_cmcmd_opt_str ${CONTAINER_NAME})
+set +x
