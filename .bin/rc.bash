@@ -5,27 +5,30 @@ if [[ -z "${CONTAINER_ROOT}" ]]; then
 fi
 PATH="${CONTAINER_ROOT}/.bin:${PATH}"
 
-if command -v podman &>/dev/null ; then
+if [[ -z "${CM_CMD}" ]]; then
     export CM_CMD='podman'
-    if command -v docker &> /dev/null ; then
-        printf '%s: Found `docker`, but using `podman` as CM_CMD (not creating alias)' "${0}"
-    else
-        alias docker='podman'
-    fi
-elif command -v docker &>/dev/null ; then
-    export CM_CMD='docker'
-    if command -v podman &> /dev/null ; then
-        printf '%s: Found `podman`, but using `docker` as CM_CMD' "${0}"
-        printf '%s: Aborting... (should not be able to get here)' "${0}"
-        exit 1
-    else
-        alias podman='docker'
-    fi
+fi
+
+case "${CM_CMD}" in
+    'podman')
+        TO_ALIAS='docker'
+        ;;
+    'docker')
+        TO_ALIAS='podman'
+        ;;
+    *)
+        printf '%s: UNSUPPORTED CM_CMD (got: %s)\n' "${0}" "${CM_CMD}"
+        ;;
+esac
+
+if ! command -v "${CM_CMD}" &>/dev/null ; then
+    printf '%s: COULD NOT FIND PREFERRED CM_CMD (got: %s)\n' "${0}" "${CM_CMD}"
+fi
+
+if command -v "${TO_ALIAS}" &>/dev/null ; then
+    printf '%s: Found `%s`, but using `%s` as CM_CMD (not creating alias)\n' "${0}" "${TO_ALIAS}" "${CM_CMD}"
 else
-    export CM_CMD='UNKNOWN'
-    alias podman='echo "SUITABLE COMMAND FOR CM_CMD NOT FOUND"'
-    alias docker='podman'
-    exit 1
+    alias "${TO_ALIAS}"="${CM_CMD}"
 fi
 
 function container_home {
