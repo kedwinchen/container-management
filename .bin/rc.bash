@@ -23,6 +23,12 @@ esac
 
 if ! command -v "${CM_CMD}" &>/dev/null ; then
     printf '%s: COULD NOT FIND PREFERRED CM_CMD (got: %s)\n' "${0}" "${CM_CMD}"
+    if command -v "${TO_ALIAS}" &>/dev/null ; then
+        printf '%s: USING ALTERNATIVE CM_CMD (%s) AS PRIMARY\n' "${0}" "${TO_ALIAS}"
+        export CM_CMD="${TO_ALIAS}"
+    else
+        printf '%s: WARNING: BOTH ALTERNATIVE (%s) AND PRIMRAY CM_CMD (%s) AS PRIMARY\n' "${0}" "${TO_ALIAS}" "${CM_CMD}"
+    fi
 fi
 
 if command -v "${TO_ALIAS}" &>/dev/null ; then
