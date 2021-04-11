@@ -20,12 +20,26 @@ for v in ${CONTAINER_VOLUMES[@]}; do
     mkdir -vp "${CONTAINER_DATA_HOME}/${this_dir}"
 done
 
-CONTAINER_NETWORK="${CONTAINER_NETWORK:-${CM_CMD}-bridge-default}"
-
-if ! "${CM_CMD}" network inspect "${CONTAINER_NETWORK}" &>/dev/null ; then
-    "${CM_CMD}" network create --driver bridge "${CONTAINER_NETWORK}"
+if ! "${CM_CMD}" network inspect "${CM_CMD_DEFAULT_NETWORK}" &>/dev/null ; then
+    "${CM_CMD}" network create --driver bridge "${CM_CMD_DEFAULT_NETWORK}"
 fi
 
 set -x
 "${CM_CMD}" create $(container_cmcmd_opt_str ${CONTAINER_NAME})
 set +x
+
+for nw in ${CONTAINER_NETWORKS[@]}; do
+    if ! "${CM_CMD}" network inspect "${nw}" &>/dev/null ; then
+        if "${CM_CMD}" network create --driver bridge "${nw}" ; then
+            printf '%s: Created new network (for %s): %s\n' "${0}" "${CM_CMD}" "${nw}"
+        else
+            printf '%s: FAILED TO CREATE NETWORK (for %s): %s\n' "${0}" "${CM_CMD}" "${nw}"
+        fi
+    fi
+
+    if "${CM_CMD}" network connect "${nw}" "${CONTAINER_NAME}" ; then
+        printf '%s: Connected container (%s) to network (%s)\n' "${0}" "${CONTAINER_NAME}" "${nw}"
+    else
+        printf '%s: FAILED TO CONNECT CONTAINER (%s) TO NETWORK (%s)\n' "${0}" "${CONTAINER_NAME}" "${nw}"
+    fi
+done

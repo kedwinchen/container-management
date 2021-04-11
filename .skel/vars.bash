@@ -28,8 +28,10 @@ CONTAINER_ENV=(
     ''
 )
 
-# The network to connect to (should be a bridge network)
-CONTAINER_NETWORK=''
+# Additional network(s) to connect to (always connects to CM_CMD_DEFAULT_NETWORK)
+CONTAINER_NETWORKS=(
+    ''
+)
 
 # Custom command line (or arguments) to be passed directly to the entrypoint
 # command in the container

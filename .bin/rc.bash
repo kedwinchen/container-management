@@ -37,6 +37,8 @@ else
     alias "${TO_ALIAS}"="${CM_CMD}"
 fi
 
+export CM_CMD_DEFAULT_NETWORK="${CM_CMD_DEFAULT_NETWORK:-${CM_CMD}-bridge-default}"
+
 function container_home {
     if [[ $# -ne 1 ]] ; then
         printf "Usage: %s container_name\n" "${0}"
@@ -112,9 +114,9 @@ function container_network_str {
     local container_name="${1}"
 
     source "$(container_home ${container_name})/vars.bash"
-    CONTAINER_NETWORK="${CONTAINER_NETWORK:-${CM_CMD}-bridge-default}"
 
-    printf -- '--hostname=%s --network-alias=%s --network=%s' "${container_name}" "${container_name}" "${CONTAINER_NETWORK}"
+    # only use CM_CMD_DEFAULT_NETWORK for creation, other networks specified in CONTAINER_NETWORKS array will be attached later
+    printf -- '--hostname=%s --network-alias=%s --network=%s' "${container_name}" "${container_name}" "${CM_CMD_DEFAULT_NETWORK}"
 }
 
 function container_cmcmd_opt_str {
