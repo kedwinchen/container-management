@@ -4,9 +4,7 @@
 # TODO: make it only pull the volume and ports
 # TODO: make it take other args
 
-if [[ -z "${CONTAINER_ROOT}" ]]; then
-    export CONTAINER_ROOT='/var/srv/containers'
-fi
+export CONTAINER_ROOT="${CONTAINER_ROOT:-'/var/srv/containers'}"
 source "${CONTAINER_ROOT}/.bin/rc.bash"
 
 if [[ $# -ne 1 ]]; then

@@ -119,6 +119,17 @@ function container_network_str {
     printf -- '--hostname=%s --network-alias=%s --network=%s' "${container_name}" "${container_name}" "${CM_CMD_DEFAULT_NETWORK}"
 }
 
+function container_name_safe_str {
+    if [[ $# -ne 1 ]] ; then
+        printf "Usage: %s container_name\n" "${0}"
+        return 1
+    fi
+
+    local container_name="${1}"
+
+    printf '%s' ${container_name} | tr -- '/ ' '-'
+}
+
 function container_cmcmd_opt_str {
     if [[ $# -ne 1 ]] ; then
         printf "Usage: %s container_name\n" "${0}"
@@ -134,6 +145,7 @@ function container_cmcmd_opt_str {
     local net_str="$(container_network_str ${container_name})"
 
     # opt_str="--name ${container_name} --restart=always ${port_str} ${vol_str} ${env_str} ${CM_CMD_CUSTOM_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
+    container_name="$(container_name_safe_str ${container_name})"
     opt_str="--name=${container_name} --restart=unless-stopped ${net_str} ${port_str} ${vol_str} ${env_str} ${CM_CMD_EXTRA_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
     printf '%s' "${opt_str}"
 }

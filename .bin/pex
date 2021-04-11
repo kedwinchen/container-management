@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [[ -z "${CONTAINER_ROOT}" ]]; then
-    export CONTAINER_ROOT='/var/srv/containers'
-fi
+export CONTAINER_ROOT="${CONTAINER_ROOT:-'/var/srv/containers'}"
 source "${CONTAINER_ROOT}/.bin/rc.bash"
 
 if [[ $# -lt 1 ]] ; then
@@ -14,7 +12,7 @@ CONTAINER_NAME="${1}"
 shift
 
 if [[ $# -lt 1 ]] ; then
-    "${CM_CMD}" exec -it -- ${CONTAINER_NAME} /bin/bash
+    "${CM_CMD}" exec -it -- $(container_name_safe_str ${CONTAINER_NAME}) /bin/bash
 else
-    "${CM_CMD}" exec -it -- ${CONTAINER_NAME} $*
+    "${CM_CMD}" exec -it -- $(container_name_safe_str ${CONTAINER_NAME}) $*
 fi

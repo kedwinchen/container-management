@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [[ -z "${CONTAINER_ROOT}" ]]; then
-    export CONTAINER_ROOT='/var/srv/containers'
-fi
+export CONTAINER_ROOT="${CONTAINER_ROOT:-'/var/srv/containers'}"
 source "${CONTAINER_ROOT}/.bin/rc.bash"
 
 if [[ $# -ne 1 ]] ; then

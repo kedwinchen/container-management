@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [[ -z "${CONTAINER_ROOT}" ]]; then
-    export CONTAINER_ROOT='/var/srv/containers'
-fi
+export CONTAINER_ROOT="${CONTAINER_ROOT:-'/var/srv/containers'}"
 source "${CONTAINER_ROOT}/.bin/rc.bash"
 
 E_ARGS=1
@@ -24,12 +22,15 @@ if [[ -f "${CONTAINER_HOME}" ]]; then
 elif [[ -d "${CONTAINER_HOME}" ]]; then
     printf '[FATAL] "%s" already exists for container "%s"\n' "${CONTAINER_HOME}" "${CONTAINER_NAME}"
     exit $E_CONTAINER_HOMEDIR_EXISTS
+else
+    mkdir -vp "${CONTAINER_HOME}"
 fi
 
-cp -Lnvr "${CONTAINER_ROOT}/.skel" "${CONTAINER_HOME}"
+#cp -Lnvr "${CONTAINER_ROOT}/.skel" "${CONTAINER_HOME}"
+rsync -r "${CONTAINER_ROOT}/.skel/" "${CONTAINER_HOME}"
 mkdir -p "$(container_data_home ${CONTAINER_NAME})"
 
-sed -i "s/REPLACE_CONTAINER_NAME/${CONTAINER_NAME}/g" "${CONTAINER_HOME}/vars.bash"
+sed -i "s#REPLACE_CONTAINER_NAME#${CONTAINER_NAME}#g" "${CONTAINER_HOME}/vars.bash"
 
 if [[ ! -z "${1}" ]] ; then
     CONTAINER_IMG="${1}"
