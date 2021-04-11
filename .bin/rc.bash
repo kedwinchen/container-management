@@ -104,6 +104,19 @@ function container_env_str {
     printf '%s' "${env_str}"
 }
 
+function container_network_str {
+    if [[ $# -ne 1 ]] ; then
+        printf "Usage: %s container_name\n" "${0}"
+        return 1
+    fi
+    local container_name="${1}"
+
+    source "$(container_home ${container_name})/vars.bash"
+    CONTAINER_NETWORK="${CONTAINER_NETWORK:-${CM_CMD}-bridge-default}"
+
+    printf -- '--hostname=%s --network-alias=%s --network=%s' "${container_name}" "${container_name}" "${CONTAINER_NETWORK}"
+}
+
 function container_cmcmd_opt_str {
     if [[ $# -ne 1 ]] ; then
         printf "Usage: %s container_name\n" "${0}"
@@ -116,9 +129,10 @@ function container_cmcmd_opt_str {
     local port_str="$(container_port_str ${container_name})"
     local vol_str="$(container_vol_str ${container_name})"
     local env_str="$(container_env_str ${container_name})"
+    local net_str="$(container_network_str ${container_name})"
 
     # opt_str="--name ${container_name} --restart=always ${port_str} ${vol_str} ${env_str} ${CM_CMD_CUSTOM_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
-    opt_str="--name ${container_name} --restart=unless-stopped ${port_str} ${vol_str} ${env_str} ${CM_CMD_EXTRA_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
+    opt_str="--name=${container_name} --restart=unless-stopped ${net_str} ${port_str} ${vol_str} ${env_str} ${CM_CMD_EXTRA_OPTS} ${CONTAINER_IMG} ${CONTAINER_CUSTOM_ARGV}"
     printf '%s' "${opt_str}"
 }
 

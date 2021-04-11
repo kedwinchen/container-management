@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [[ -z "${CONTAINER_ROOT}" ]]; then
-    export CONTAINER_ROOT='/var/srv/containers'
-fi
+export CONTAINER_ROOT="${CONTAINER_ROOT:-'/var/srv/containers'}"
 source "${CONTAINER_ROOT}/.bin/rc.bash"
 
 if [[ $# -ne 1 ]]; then
@@ -21,6 +19,12 @@ for v in ${CONTAINER_VOLUMES[@]}; do
     # printf '[INFO] (container %s) creating: %s\n' "${CONTAINER_NAME}" "${this_dir}"
     mkdir -vp "${CONTAINER_DATA_HOME}/${this_dir}"
 done
+
+CONTAINER_NETWORK="${CONTAINER_NETWORK:-${CM_CMD}-bridge-default}"
+
+if ! "${CM_CMD}" network inspect "${CONTAINER_NETWORK}" &>/dev/null ; then
+    "${CM_CMD}" network create --driver bridge "${CONTAINER_NETWORK}"
+fi
 
 set -x
 "${CM_CMD}" create $(container_cmcmd_opt_str ${CONTAINER_NAME})

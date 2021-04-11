@@ -28,6 +28,9 @@ CONTAINER_ENV=(
     ''
 )
 
+# The network to connect to (should be a bridge network)
+CONTAINER_NETWORK=''
+
 # Custom command line (or arguments) to be passed directly to the entrypoint
 # command in the container
 #
