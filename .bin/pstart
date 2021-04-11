@@ -15,8 +15,12 @@ shift
 
 "${CM_CMD}" start "${CONTAINER_NAME}"
 
-# Exit code 125 means there was no container with that name
-if [[ $? -eq 125 ]] ; then
+# Exit code 125 means there was no container with that name (podman)
+# but it is exit code 1 for docker
+exit_code=$?
+if [[ $exit_code -eq 125 ]] || [[ $exit_code -eq 1 ]] ; then
     pcreate "${CONTAINER_NAME}"
     "${CM_CMD}" start "${CONTAINER_NAME}"
+else
+    printf '%s: FATAL: got unexpected exit code (%s)\n' "${0}" "${exit_code}"
 fi
