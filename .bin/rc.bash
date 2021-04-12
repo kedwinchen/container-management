@@ -106,19 +106,6 @@ function container_env_str {
     printf '%s' "${env_str}"
 }
 
-function container_network_str {
-    if [[ $# -ne 1 ]] ; then
-        printf "Usage: %s container_name\n" "${0}"
-        return 1
-    fi
-    local container_name="${1}"
-
-    source "$(container_home ${container_name})/vars.bash"
-
-    # only use CM_CMD_DEFAULT_NETWORK for creation, other networks specified in CONTAINER_NETWORKS array will be attached later
-    printf -- '--hostname=%s --network-alias=%s --network=%s' "${container_name}" "${container_name}" "${CM_CMD_DEFAULT_NETWORK}"
-}
-
 function container_name_safe_str {
     if [[ $# -ne 1 ]] ; then
         printf "Usage: %s container_name\n" "${0}"
@@ -128,6 +115,20 @@ function container_name_safe_str {
     local container_name="${1}"
 
     printf '%s' ${container_name} | tr -- '/ ' '-'
+}
+
+function container_network_str {
+    if [[ $# -ne 1 ]] ; then
+        printf "Usage: %s container_name\n" "${0}"
+        return 1
+    fi
+    local container_name="${1}"
+
+    source "$(container_home ${container_name})/vars.bash"
+    container_name="$(container_name_safe_str ${container_name})"
+
+    # only use CM_CMD_DEFAULT_NETWORK for creation, other networks specified in CONTAINER_NETWORKS array will be attached later
+    printf -- '--hostname=%s --network-alias=%s --network=%s' "${container_name}" "${container_name}" "${CM_CMD_DEFAULT_NETWORK}"
 }
 
 function container_cmcmd_opt_str {
