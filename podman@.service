@@ -1,0 +1,10 @@
+[Unit]
+Description=systemd service for podman container: %I
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/podman start -a %i
+ExecStop=/usr/bin/podman stop -t 2 %i
+
+[Install]
+WantedBy=local.target
